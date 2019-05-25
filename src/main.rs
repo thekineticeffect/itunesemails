@@ -76,7 +76,12 @@ fn process_file(filename: &Path) -> Option<Vec<Purchase>> {
 //    println!("Parsed email: {:?}", parsed.headers.get_first_value("Subject").unwrap());
 
     let body = parsed.subparts[1].get_body().unwrap();
-    extract_purchases_from_html(&body[..])
+    if let Some(result) = extract_purchases_from_html(&body[..]) {
+        Some(result)
+    } else {
+        println!("Warning: File {} failed to be processed.", filename.display());
+        None
+    }
 }
 
 fn extract_purchases_from_html(html: &str) -> Option<Vec<Purchase>> {
@@ -103,6 +108,8 @@ fn extract_purchases_from_html(html: &str) -> Option<Vec<Purchase>> {
         let purchase = process_element(element, &purchaser);
         if let Some(purchase) = purchase {
             purchases.push(purchase)
+        } else {
+            println!("Warning: Row failed to be processed.")
         }
     }
     Some(purchases)
