@@ -2,6 +2,7 @@ extern crate mailparse;
 extern crate scraper;
 extern crate currency;
 extern crate csv;
+extern crate rayon;
 
 use std::io;
 use std::io::{BufReader, Read, Error};
@@ -11,22 +12,32 @@ use std::path::{Path};
 use scraper::{Html, Selector};
 use currency::Currency;
 
+use rayon::prelude::*;
+
 fn main() {
     process_folder("./mails");
 }
 
 fn process_folder(dir: &str) {
-    let xxx = files_in_folder(dir).map_err(|error|
+    let files = files_in_folder(dir).map_err(|error|
         println!("Had error: {}", error)
     ).unwrap();
 
-    let mut purchases = Vec::new();
-    for path in xxx {
-        let file_purchases = process_file(path.path().as_path());
+    let files: Vec<DirEntry> = files.collect();
+    let mut purchase_sublists = Vec::new();
+    let purchase_iter = files
+        .par_iter()
+        .map(|path| process_file(path.path().as_path()));
+
+    purchase_sublists.par_extend(purchase_iter);
+
+    let mut purchases= Vec::new();
+    for file_purchases in purchase_sublists {
         if let Some(mut file_purchases) = file_purchases {
             purchases.append(&mut file_purchases);
         }
     }
+
     write_purchases("out.csv", &purchases);
     println!("Found {} purchases.", purchases.len());
 }
