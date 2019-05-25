@@ -130,11 +130,10 @@ fn process_element(element: ElementRef, purchaser: &String) -> Option<Purchase> 
 }
 
 fn read_file(filename: &Path) -> Result<Vec<u8>, Error> {
-    let file = File::open(filename)?;
-    let mut buf_reader = BufReader::new(file);
+    let mut reader = BufReader::new(File::open(filename)?);
 
     let mut contents = Vec::new();
-    let _read_bytes = buf_reader.read_to_end(&mut contents);
+    reader.read_to_end(&mut contents)?;
     Ok(contents)
 }
 
