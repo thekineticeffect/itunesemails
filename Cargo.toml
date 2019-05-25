@@ -1,0 +1,11 @@
+[package]
+name = "itunesmails"
+version = "0.1.0"
+authors = ["Avinash Vakil <m@avinashvakil.com>"]
+edition = "2018"
+
+[dependencies]
+mailparse = "0.7.0"
+scraper = "0.10.0"
+currency = "0.4.0"
+csv = "1"
