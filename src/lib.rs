@@ -14,6 +14,27 @@ use currency::Currency;
 
 use rayon::prelude::*;
 
+use std::ffi::CStr;
+use std::os::raw::{c_char, c_uint};
+
+#[no_mangle]
+pub extern "C" fn process_folder_c(dir: *const c_char) -> c_uint {
+    let mut string = String::new();
+    unsafe {
+        let slice = CStr::from_ptr(dir);
+        if let Ok(rust_str) = slice.to_str() {
+            string += rust_str;
+        } else {
+            return 1
+        }
+    }
+    if let Ok(_) = process_folder(&string) {
+        0
+    } else {
+        1
+    }
+}
+
 pub fn process_folder(dir: &str) -> Result<(), Error> {
     let files = files_in_folder(dir)?;
 

@@ -3,6 +3,7 @@ name = "itunesmails"
 version = "0.1.0"
 authors = ["Avinash Vakil <m@avinashvakil.com>"]
 edition = "2018"
+build = "src/build.rs"
 
 [dependencies]
 mailparse = "0.7.0"
@@ -10,3 +11,10 @@ scraper = "0.10.0"
 currency = "0.4.0"
 csv = "1"
 rayon = "1.0"
+
+[build-dependencies]
+cbindgen = "0.8.7"
+
+[lib]
+name = "itunesmails"
+crate-type = ["lib", "cdylib", "staticlib"]
