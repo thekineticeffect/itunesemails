@@ -82,7 +82,10 @@ fn process_file(filename: &Path) -> Option<Vec<Purchase>> {
 
     let parsed = mailparse::parse_mail(contents.as_slice()).ok()?;
 
-    let body = parsed.subparts.get(1)?.get_body().ok()?;
+    let body = parsed.subparts
+        .get(1)?
+        .get_body()
+        .ok()?;
     if let Some(result) = extract_purchases_from_html(&body[..]) {
         Some(result)
     } else {
@@ -96,21 +99,27 @@ fn extract_purchases_from_html(html: &str) -> Option<Vec<Purchase>> {
     let document = Html::parse_document(html);
 
     let td_sel = Selector::parse("td").ok()?;
-    let mut id_rows = document.select(&td_sel)
+    let mut id_rows = document
+        .select(&td_sel)
         .filter(|elem|
             elem.text().next().unwrap_or("") == "APPLE ID");
     let purchaser = id_rows
-        .next()
-        .and_then(|row| row.last_child()
-            .and_then(|child| child.value().as_text()
-                .and_then(|text| Some(text.to_string()))))?;
+        .next()?
+        .last_child()?
+        .value()
+        .as_text()?
+        .to_string();
 
     let tbl_sel = Selector::parse(".aapl-mobile-tbl").unwrap();
     let row_sel = Selector::parse("tr").unwrap();
 
-    let table = document.select(&tbl_sel).next()?;
-    let rows = table.select(&row_sel)
-        .filter(|element| element.value().attr("style").unwrap_or("") == "max-height:114px;");
+    let table = document
+        .select(&tbl_sel)
+        .next()?;
+    let rows = table
+        .select(&row_sel)
+        .filter(|element|
+            element.value().attr("style").unwrap_or("") == "max-height:114px;");
     for element in rows {
         let purchase = process_element(element, &purchaser);
         if let Some(purchase) = purchase {
@@ -126,11 +135,17 @@ fn process_element(element: ElementRef, purchaser: &String) -> Option<Purchase> 
     let name_sel = Selector::parse(".title").unwrap();
     let price_sel = Selector::parse(".price-cell").unwrap();
 
-    let name = element.select(&name_sel).next().and_then(
-        |name_elem| name_elem.text().next())?;
-    let price = element.select(&price_sel).next().and_then(
-        |price_elem| price_elem.text()
-            .filter(|text| text.contains("$")).next())?;
+    let name = element
+        .select(&name_sel)
+        .next()?
+        .text()
+        .next()?;
+    let price = element
+        .select(&price_sel)
+        .next()?
+        .text()
+        .filter(|text| text.contains("$"))
+        .next()?;
     let price = Currency::from_str(price).unwrap_or(Currency::new());
     let purchase = Purchase { name: String::from(name), purchaser: String::clone(&purchaser), price };
     Some(purchase)
