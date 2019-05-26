@@ -62,18 +62,9 @@ fn write_purchases(destination: &str, purchases: &Vec<Purchase>) {
 }
 
 fn process_file(filename: &Path) -> Option<Vec<Purchase>> {
-    let contents = read_file(&filename);
-    if contents.is_err() {
-        return None;
-    }
-    let contents = contents.unwrap();
+    let contents = read_file(&filename).ok()?;
 
-    let parsed = mailparse::parse_mail(contents.as_slice());
-    if parsed.is_err() {
-        return None;
-    }
-    let parsed = parsed.unwrap();
-//    println!("Parsed email: {:?}", parsed.headers.get_first_value("Subject").unwrap());
+    let parsed = mailparse::parse_mail(contents.as_slice()).ok()?;
 
     let body = parsed.subparts[1].get_body().unwrap();
     if let Some(result) = extract_purchases_from_html(&body[..]) {
