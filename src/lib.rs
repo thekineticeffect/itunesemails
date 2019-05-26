@@ -4,8 +4,6 @@ extern crate currency;
 extern crate csv;
 extern crate rayon;
 
-use std::env;
-use std::process;
 use std::io;
 use std::io::{BufReader, Read, Error};
 use std::fs;
@@ -16,20 +14,7 @@ use currency::Currency;
 
 use rayon::prelude::*;
 
-fn main() {
-    let directory: Vec<String> = env::args().collect();
-    if let Some(dir) = directory.get(1) {
-        process_folder(dir).unwrap_or_else(|error| {
-            println!("Had error: {}", error);
-            process::exit(1)
-        });
-    } else {
-        println!("Requires a folder as the first argument!");
-        process::exit(1);
-    }
-}
-
-fn process_folder(dir: &str) -> Result<(), Error> {
+pub fn process_folder(dir: &str) -> Result<(), Error> {
     let files = files_in_folder(dir)?;
 
     let files: Vec<DirEntry> = files.collect();
