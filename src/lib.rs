@@ -82,7 +82,7 @@ fn process_file(filename: &Path) -> Option<Vec<Purchase>> {
 
     let parsed = mailparse::parse_mail(contents.as_slice()).ok()?;
 
-    let body = parsed.subparts[1].get_body().unwrap();
+    let body = parsed.subparts.get(1)?.get_body().ok()?;
     if let Some(result) = extract_purchases_from_html(&body[..]) {
         Some(result)
     } else {
